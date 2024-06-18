@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popping Numbers Game</title>
+    <style>
+        h1 {
+            color: #da6700; /* Change header color */
+            font-weight: bold;
+        }
+        
+        .header {
+            position: absolute; /* Position the header relative to the viewport */
+            top: 50px; /* Align the header to the top of the viewport */
+            left: 0; /* Align the header to the left of the viewport */
+            width: 100%; /* Set the width to span the entire viewport */
+            text-align: center; /* Center-align the header text */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Background color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+           
+        }
+        .game-container {
+            text-align: center;
+            background-color: #fff; /* Game board background color */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a shadow for depth */
+            margin-top: 130px; 
+        }
+        .board {
+            background-color: #ffdf7d;
+            padding: 5px;
+            display: grid;
+            grid-template-columns: <%= "repeat(#{@board[0].size}, 50px)" %>; 
+            grid-template-rows: <%= "repeat(#{@board.size}, 50px)" %>; 
+            gap: 5px ; 
+            margin-top: 5px;
+            justify-content: center;
+        }
+
+        .cell {
+            background-color: #fff3cd; /* Cell background color */
+            border-radius: 0px ;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer; /* Add cursor pointer for interaction */
+            
+        }
+
+        .cell[data-number="0"], .number-range span[data-number="0"] { color: yellow; }
+        .cell[data-number="1"], .number-range span[data-number="1"] { color: blue; }
+        .cell[data-number="2"], .number-range span[data-number="2"] { color: red; }
+        .cell[data-number="3"], .number-range span[data-number="3"] { color: black; }
+        .cell[data-number="4"], .number-range span[data-number="4"] { color: green; }
+        .cell[data-number="5"], .number-range span[data-number="5"] { color: purple; }
+        .cell[data-number="6"], .number-range span[data-number="6"] { color: orange; }
+        .cell[data-number="7"], .number-range span[data-number="7"] { color: pink; }
+        .cell[data-number="8"], .number-range span[data-number="8"] { color: brown; }
+        .cell[data-number="9"], .number-range span[data-number="9"] { color: teal; }
+        .cell[data-number="10"], .number-range span[data-number="10"] { color: navy; }
+
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 0px;
+            color: #da6700;
+        }
+
+        .number-range {    
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0px;
+            margin-bottom: 0px;
+          
+        }
+
+        .number-range span {
+            display: inline-block;
+            width: 40px; /* Adjust width to desired square size */
+            height: 40px; /* Adjust height to match width for a square */
+            padding: 5px;
+            background-color: #fff3cd; /* Adjust background color */
+            color: #da6700; /* Adjust text color */
+            border-radius: 5px;
+            cursor: pointer; /* Add cursor pointer for interaction */
+            text-align: center; /* Center text horizontally */
+            line-height: 30px; /* Center text vertically */
+        }
+
+        .number-range span.selected {
+            background-color: #da6700; /* Highlight selected number */
+        }
+
+        .btn-new-game {
+        background-color: #da6700;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none; /* Remove default underline */
+        font-size: 16px;
+        margin-top: 0px; /* Adjust spacing */
+        display: inline-block; /* Make it inline-block to apply padding and margin properly */
+        }
+
+        .btn-new-game:hover {
+            background-color: #ff9800;
+        }
+
+        h2 {
+            color: #da6700; /* Change header color */
+            font-weight: bold;
+        }
+
+      
+
+       
+
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Popping Numbers</h1>
+    </div>
+    
+    <div class="game-container">
+        <div class="number-range">
+            <% (0...@game.number_range).each do |num| %>
+                <span onclick="selectNumber(this)" data-number="<%= num %>"><%= num %></span>
+            <% end %>
+        </div>
+
+        <div class="board">
+            <% @board.each_with_index do |row, i| %>
+                <% row.each_with_index do |cell, j| %>
+                    <div class="cell" data-row="<%= i %>" data-col="<%= j %>" data-number="<%= cell %>" onclick="selectCell(this)">
+                        <%= cell.nil? ? '' : cell %>
+                    </div>
+                <% end %>
+            <% end %>
+        </div>
+        <div class="score">Score: <%= @game.score %></div>
+
+        <% if @game.errors.any? || @game.board_array.flatten.all? %>
+            <div class="game-over">
+                <h2>Game Over</h2>
+                <%= link_to 'Start New', new_game_path, class: 'btn-new-game' %>
+            </div>
+        <% end %>
+
+        <%= form_with(model: @game, url: game_path(@game), method: :patch, local: true, id: 'number-form') do %>
+            <input type="hidden" name="row" id="row-input">
+            <input type="hidden" name="col" id="col-input">
+            <input type="hidden" name="number" id="number-input">
+        <% end %>
+    </div>
+
+     <script>
+        function selectNumber(span) {
+            // Remove 'selected' class from all spans
+            document.querySelectorAll('.number-range span').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked span
+            span.classList.add('selected');
+
+            // Update hidden input value with selected number
+            document.getElementById('number-input').value = span.getAttribute('data-number');
+        }
+
+        function selectCell(cell) {
+            if (cell.innerText.trim() !== '' && cell.innerText.trim() !== '*') {
+                return;
+            }
+            const row = cell.getAttribute('data-row');
+            const col = cell.getAttribute('data-col');
+            const number = document.getElementById('number-input').value;
+
+            if (number.trim() !== "") {
+                // Update the cell content immediately
+                cell.textContent = number;
+                cell.setAttribute('data-number', number); // Set data-number attribute
+                cell.style.color = getColorForNumber(number); // Set the color immediately
+
+
+                // Update the hidden inputs and submit the form
+                document.getElementById('row-input').value = row;
+                document.getElementById('col-input').value = col;
+
+                document.getElementById('number-form').submit();
+            } else {
+                alert('Please select a number from the range above.');
+            }
+        }
+
+        function getColorForNumber(number) {
+            switch (number) {
+                case '0': return 'yellow';
+                case '1': return 'blue';
+                case '2': return 'red';
+                case '3': return 'black';
+                case '4': return 'green';
+                case '5': return 'purple';
+                case '6': return 'orange';
+                case '7': return 'pink';
+                case '8': return 'brown';
+                case '9': return 'teal';
+                case '10': return 'navy';
+                
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

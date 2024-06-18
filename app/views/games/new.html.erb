@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Game</title>
+    <style>
+        h1 {
+            color: #da6700; /* Change header color */
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        form label[for="game_board_size"] {
+            color: #da6700;
+        }
+
+        form label[for="game_number_range"] {
+            color: #da6700; 
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            text-align: center;
+            margin-top: 50px; 
+        }
+        
+        form {
+            display: inline-block;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            
+        }
+        
+        form div {
+            margin-bottom: 10px;
+        }
+        
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        form select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            text-align-last: center; 
+        }
+
+        /* Custom styling for dropdown options */
+        select option {
+            text-align: center; /* Center the text within dropdown options */
+        }
+        
+        form input[type="submit"] {
+            background-color: #da6700;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        form input[type="submit"]:hover {
+            background-color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Popping Numbers</h1>
+        <%= form_with(model: @game, local: true) do |form| %>
+            <div>
+                <%= form.label :board_size, "Board Size" %>
+                <%= form.select :board_size, options_for_select((5..25).map { |n| ["#{n} x #{n}", n] }, selected: 5 ), { prompt: "Select board size" }, required: true %>
+            </div>
+            <div>
+                <%= form.label :number_range, "Number Range" %>
+                <%= form.select :number_range, options_for_select((1..10).map { |n| ["0 - #{n-1}", n] }, selected: 10), { prompt: "Select number range" }, required: true %>
+            </div>
+            <%= form.hidden_field :board %>
+            <%= form.hidden_field :score, value: 0 %>
+            <%= form.submit "Start Game" %>
+        <% end %>
+    </div>
+</body>
+</html>

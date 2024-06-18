@@ -1,0 +1,58 @@
+<h1>Game Board</h1>
+<table border="1">
+  <thead>
+    <tr>
+      <th></th>
+      <% (1..@board.first.size).each do |i| %>
+        <th><%= i %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @board.each_with_index do |row, i| %>
+      <tr>
+        <th><%= i + 1 %></th>
+        <% row.each_with_index do |cell, j| %>
+          <td data-row="<%= i %>" data-col="<%= j %>" onclick="selectCell(this)">
+            <%= cell.nil? ? '-' : cell %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Score: <%= @game.score %></h2>
+
+<%= form_with(model: @game, url: game_path(@game), method: :patch, local: true, id: 'number-form') do %>
+  <input type="hidden" name="row" id="row-input">
+  <input type="hidden" name="col" id="col-input">
+  <input type="hidden" name="number" id="number-input">
+<% end %>
+
+<script>
+  function selectCell(cell) {
+    const row = cell.getAttribute('data-row');
+    const col = cell.getAttribute('data-col');
+    const number = prompt("Enter the number:");
+
+    if (number !== null && !isNaN(number) && number.trim() !== "") {
+      document.getElementById('row-input').value = row;
+      document.getElementById('col-input').value = col;
+      document.getElementById('number-input').value = number;
+
+      document.getElementById('number-form').submit();
+    }
+  }
+</script>
+
+<% if @game.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@game.errors.count, "error") %> prohibited this game from being saved:</h2>
+    <ul>
+      <% @game.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

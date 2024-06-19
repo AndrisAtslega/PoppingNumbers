@@ -138,7 +138,14 @@ class Game < ApplicationRecord
         self.board = board_data.to_json
         save
       end
+
+      def gameover
+        board_array.flatten.include?('*')
+      end
+
       private
+
+      
 
       def points_for_length(length)
         case length
